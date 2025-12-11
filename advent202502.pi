@@ -1,0 +1,42 @@
+% Advent of Code 02.12.2025 https://adventofcode.com/2025/day/2
+import util.
+twin(X) => % the digits of X repeat once: to_string(X) = Str ++ Str for a certain string Str
+    Len = floor(log10(X)) + 1,
+    Len mod 2 = 0, F = 10**(Len // 2),
+    X div F = X mod F.
+
+main1 => 
+    Rqs = read_file_chars("202502.txt"),  % Example: "202402short.txt"
+    M = [(to_int(Range[1]), to_int(Range[2])) : Rstr in Rqs.split(","), Range = Rstr.split("-")],
+    Sum = 0,
+    foreach((From,To) in M, X in From..To, twin(X)) 
+        % println((From,To,X)),
+        Sum := Sum + X 
+    end,
+    println(Sum). /*
+Part 1 example: 1227775554, correct
+Part 1 problem: 18952700150, correct */
+
+rep("",_) => true.
+rep(Xstr,Len) =>
+    Xlen = len(Xstr),
+    Xlen mod Len = 0,
+    Xstr[1..Len] = Xstr[Len+1..2*Len],
+    if len(Xstr) div Len > 2 then rep(Xstr[Len+1..Xlen],Len) end.
+
+invalid(X) => % the digits of X repeat once or more: to_string(X) = Str ++ Str, or = Str ++ Str ++ Str and so on
+    Xstr = to_string(X),
+    between(1,len(Xstr)//2,Len),
+    rep(Xstr,Len).
+
+main2 => 
+    Rqs = read_file_chars("202502.txt"),  % Example: "202402short.txt"
+    M = [(to_int(Range[1]), to_int(Range[2])) : Rstr in Rqs.split(","), Range = Rstr.split("-")],
+    Sum = 0,
+    foreach((From,To) in M, X in From..To, invalid(X)) 
+        % println((From,To,X)),
+        Sum := Sum + X 
+    end,
+    println(Sum). /*
+Part 2 example: 4174379265, correct
+Part 2 problem: 28858486244, correct */

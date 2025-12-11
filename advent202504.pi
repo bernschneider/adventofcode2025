@@ -1,0 +1,30 @@
+% Advent of Code 04.12.2025 https://adventofcode.com/2025/day/4
+import util.
+
+step(M,NextM,StepSum) =>
+    NR = len(M), NC = len(M[1]), Sum = 0, Next = copy_term(M),
+    foreach(R in 1..NR, C in 1..NC, M[R,C] = 1)
+        X = sum([M[Rn,Cn] : Rn in R-1..R+1, Cn in C-1..C+1, (Rn,Cn)!=(R,C), 0<Cn,Cn=<NC, 0<Rn,Rn=<NR]),
+        if X < 4 then 
+            Next[R,C] := 0,
+            Sum := Sum + 1 %, printf("%d|%d: %d%n", R,C,X)
+        end
+    end, 
+    NextM = Next, StepSum = Sum.
+
+main(Part,Version) =>  % main(P,"short") or main(P,"") for P in 1..2
+    Grid = read_file_lines("202504"++Version++".txt"), 
+    NR = len(Grid), NC = len(Grid[1]), Sum = 0, 
+    M = {{cond(Grid[R,C] = @, 1, 0) : C in 1..NC} : R in 1..NR}, 
+    StepSum = 0,
+    do
+        step(M,NextM,Res), 
+        StepSum := Res, % println(stepSum=StepSum),
+        M := NextM,
+        Sum := Sum + StepSum
+    while(Part = 2, StepSum > 0),
+    println(sum=Sum). /*
+main(1,"short"): 13, correct
+main(1,"") :   1416, correct 
+main(2,"short"): 43, correct
+main(2,"") :   9086, correct */

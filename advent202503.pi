@@ -1,0 +1,28 @@
+% Advent of Code 03.12.2025 https://adventofcode.com/2025/day/3
+import util.
+
+maxjolts(L, Cnt, Res) => % the maximum joltage from Bank 
+    Mx = max(L[1..len(L)-Cnt+1]),
+    Idx = find_first_of(L, Mx),
+    if Cnt > 1 then 
+        maxjolts(L[Idx+1..len(L)], Cnt-1, Res1),
+        % printf("maxjolts(%w, %d, %d)%n", L[Idx+1..len(L)], Cnt-1, Res1),
+        Res = 10**(Cnt-1) * Mx + Res1
+    else
+        Res = Mx
+    end.
+
+main(Cnt) => 
+    Banks = read_file_lines("202503.txt"),  % Example: "202403short.txt"
+    Sum = 0,
+    foreach(Bank in Banks) 
+        L = [ord(Chr) - 48 : Chr in Bank], 
+        maxjolts(L, Cnt, MJ),
+        printf("Bank %s: %w%n", Bank, MJ),
+        Sum := Sum + MJ
+    end,
+    println(Sum). /*
+Part 1 example: main(2) = 357, correct
+Part 1 problem: main(12) = 17316, correct 
+Part 1 example: main(2) = 3121910778619, correct
+Part 1 problem: main(12) = 171741365473332, correct */

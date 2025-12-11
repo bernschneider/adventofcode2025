@@ -1,0 +1,39 @@
+% Advent of Code 06.12.2025 https://adventofcode.com/2025/day/6
+import util.
+
+main(1,Version) =>  % main(P,"short") or main(P,"") for P in 1..2
+    Lines = read_file_lines("202506"++Version++".txt"), 
+    NR = len(Lines)-1,
+    NC = len(Lines[1].split()), % println(nr=NR),
+    M = new_array(NR,NC),
+    foreach(R in 1..NR) M[R] = to_array(map(to_int,Lines[R].split())) end, % println(m=M),
+    Ops = Lines[NR+1].split(), % println(Ops),
+    Sum = 0,
+    foreach({Op,Col} in zip(Ops, M.columns()))
+        Sum := Sum + cond(Op = "+", sum(Col), prod(Col))
+    end,
+    println(Sum).
+ /*
+main(1,"short"): 4277556
+main(1,""):      4878670269096  correct */
+
+main(2,Version) =>  % main(P,"short") or main(P,"") for P in 1..2
+    Lines = read_file_lines("202506"++Version++".txt"), 
+    NR = len(Lines)-1, % no. of numbers per problem
+    LinesT = transpose(Lines[1..NR]), % println(LinesT),
+    Stop = [' ' : _ in 1..NR], % the column seperating the problems
+    Ops = Lines[NR+1].split(), 
+    Sum = 0, L = [], P = 1, % init
+    foreach(Str in LinesT)
+        if Str != Stop 
+            then L := [to_int(Str) | L]
+            else % we got all numbers for problem P:
+                 Sum := Sum + cond(Ops[P] = "+", sum(L), prod(L)), 
+                 L := [], % init L for next problem
+                 P := P + 1 
+        end
+    end,
+    Sum := Sum + cond(Ops[P] = "+", sum(L), prod(L)), % include result of last problem
+    println(Sum). /*
+main(2,"short"): 3263827
+main(2,""):      8674740488592              correct */

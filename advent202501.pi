@@ -1,0 +1,28 @@
+% Advent of Code 01.12.2025 https://adventofcode.com/2025/day/1
+import util.
+
+main1 => 
+    Rqs = read_file_lines("202501txt"),  % Example: "202401short.txt"
+    M = [(cond(Line[1] = 'L', -1, 1), to_int(Line[2..len(Line)])) : Line in Rqs],
+    Cnt = 0, Pos = 50,
+    foreach((Dir,Dist) in M)
+        Pos := (Pos + Dir * Dist) mod 100, 
+        if Pos == 0 then Cnt := Cnt + 1 end
+    end,
+    println(Cnt). /*
+Part 1 example: 3, correct
+Part 1 problem: 997, correct */
+
+main2 => 
+    Rqs = read_file_lines("202501.txt"),  % Example: "202401short.txt"
+    M = [(cond(Line[1] = 'L', -1, 1), to_int(Line[2..len(Line)])) : Line in Rqs],
+    Cnt = 0, Pos = 50,
+    foreach((Dir,Dist) in M)                  % v-- Ausnahmebehandlung für Left-Skip 0  --v
+        Zeros = abs(Pos + Dir * Dist) div 100 + cond((Dir < 0, 0 < Pos, Pos =< Dist), 1, 0),
+        % printf("%2d %+d * %2d; Zeros = %d%n", Pos,Dir,Dist,Zeros),
+        Cnt := Cnt + Zeros,
+        Pos := (Pos + Dir * Dist) mod 100
+    end,
+    println(Cnt). /*
+Part 1 example: 6, correct
+Part 1 problem: 5978, correct */

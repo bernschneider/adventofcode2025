@@ -1,0 +1,47 @@
+% Advent of Code 05.12.2025 https://adventofcode.com/2025/day/5
+import util.
+
+step(M,NextM,StepSum) =>
+    NR = len(M), NC = len(M[1]), Sum = 0, Next = copy_term(M),
+    foreach(R in 1..NR, C in 1..NC, M[R,C] = 1)
+        X = sum([M[Rn,Cn] : Rn in R-1..R+1, Cn in C-1..C+1, (Rn,Cn)!=(R,C), 0<Cn,Cn=<NC, 0<Rn,Rn=<NR]),
+        if X < 4 then 
+            Next[R,C] := 0,
+            Sum := Sum + 1 %, printf("%d|%d: %d%n", R,C,X)
+        end
+    end, 
+    NextM = Next, StepSum = Sum.
+
+main(Part,Version) =>  % main(P,"short") or main(P,"") for P in 1..2
+    Lines = read_file_lines("202505"++Version++".txt"), 
+    I = 1, Fresh = [],
+    while(Lines[I] != "")
+        Fresh := [map(to_int, Lines[I].split("-")) | Fresh],
+        I := I + 1
+    end, N = I-1, 
+    Avail = [to_int(Line) : Line in Lines[I+1..len(Lines)]], 
+    Cnt = 0,
+    if Part == 1 then
+        foreach(Id in Avail, sum([cond((L =< Id, Id =< R), 1, 0) : [L,R] in Fresh]) > 0)
+            Cnt := Cnt + 1
+        end,
+    elseif Part == 2 then
+        Fresh := sort(Fresh), % sort the intervals!
+        J = 1, 
+        while(J < N)
+            L = Fresh[J,1], R = Fresh[J,2], % L..R is Fresh[J]
+            while(J < N, Fresh[J,2]+1 >= Fresh[J+1,1]) % while there is no gap between Fresh[J] and Fresh[J+1] ..
+                R := max(R, Fresh[J+1,2]), % .. include Fresh[J+1] to L..R
+                J := J + 1
+            end,
+            Cnt := Cnt + R - L + 1, % add the length of L..R to Cnt
+            J := J + 1 % continue
+        end,
+        % in some cases there remains a single interval. This must be included to Cnt finally:
+        if J == N then Cnt := Cnt + Fresh[N,2] - Fresh[N,1] + 1 end
+    end,
+    println(cnt=Cnt). /*
+main(1,"short"): cnt=3
+main(1,""):      cnt=690  
+main(2,"short"): cnt=14
+main(2,""):      cnt=344323629240733            CPU time 0.003 seconds, correct */
