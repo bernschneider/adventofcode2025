@@ -1,0 +1,56 @@
+% Advent of Code 08.12.2025 https://adventofcode.com/2025/day/
+import util.
+cntWr(Wr,R,C,Dir) = sum([1 : (R12,C1,C2) in Wr, (R12=R; sign(R12-R)=Dir), min(C1,C2)=<C, C<max(C1,C2)]).
+cntSr(Sr,R,C,Dir) = sum([1 : (C12,R1,R2) in Sr, (C12=C; sign(C12-C)=Dir), min(R1,R2)=<R, R<max(R1,R2)]).
+
+main(1,Version) =>  % main(1,"short") or main(1,"") 
+    Lines = read_file_lines("202509"++Version++".txt"), N = len(Lines), 
+    Coord = [map(to_int, Line.split(",")) : Line in Lines], 
+    MaxA = 0, MaxI = -1, MaxJ = -1, % maximum Area is between corners MaxI and MaxJ 
+    foreach(I in 1..N-1, J in I+1..N)
+        A = abs(Coord[I,1] - Coord[J,1] + 1) * abs(Coord[I,2] - Coord[J,2] + 1),
+        if A > MaxA then MaxA := A, MaxI := I, MaxJ := J end
+    end,
+    printf("%w = (%d - %d + 1) * abs(%d - %d + 1)", MaxA, Coord[MaxI,1],Coord[MaxJ,1], Coord[MaxI,2],Coord[MaxJ,2] ). /*
+time(main(1,"short")): 50 = (11 - 2 + 1) * abs(7 - 3 + 1) correct
+time(main(1,"")):      4748769124 = (86377 - 16500 + 1) * abs(82538 - 14581 + 1)    CPU time 0.345 seconds, correct */
+
+main(2,Version) =>  % main(2,"short") or main(2,"") 
+    Lines = read_file_lines("202509"++Version++".txt"), N = len(Lines), 
+    Coord = [map(to_int, Line.split(",")) : Line in Lines], 
+    As = [],
+    foreach(I in 1..N-1, J in I+1..N)
+        A = abs(Coord[I,1] - Coord[J,1] + 1) * abs(Coord[I,2] - Coord[J,2] + 1),
+        As := [(A,I,J)|As]
+    end,
+    As := sort_down(As), % println(as=As), % (MaxA,MaxI,MaxJ) = As[1], 
+    StartWr = cond(Version = "short", 1, 2), StartSr = 3 - StartWr,
+    Wr = [(Coord[I,2], min(C1,C2),max(C1,C2)) : I in StartWr..2..N-1, C1 = Coord[I,1], C2 = Coord[I+1,1]], % println(wr=Wr),
+    Sr = [(Coord[I,1], min(R1,R2),max(R1,R2)) : I in StartSr..2..N-1, R1 = Coord[I,2], R2 = Coord[I+1,2]], % println(sr=Sr),
+    K = 1, Good = false,
+    do
+        (A,I,J) = As[K],
+        if Coord[I,1] =< Coord[J,1] % C1 =< C2
+            then [C1,R1,C2,R2] = [Coord[I,1],Coord[I,2],Coord[J,1],Coord[J,2]]
+            else [C1,R1,C2,R2] = [Coord[J,1],Coord[J,2],Coord[I,1],Coord[I,2]] 
+        end,                                                   
+        if ((R1 < R2, cntWr(Wr,R1,C2,-1) mod 2 = 1, cntSr(Sr,R1,C2,1)  mod 2 = 1,
+                      cntWr(Wr,R2,C1,1)  mod 2 = 1, cntSr(Sr,R2,C1,-1) mod 2 = 1);
+            (R1 > R2, cntWr(Wr,R1,C2,1)  mod 2 = 1, cntSr(Sr,R1,C2,1)  mod 2 = 1,
+                      cntWr(Wr,R2,C1,-1) mod 2 = 1, cntSr(Sr,R2,C1,-1) mod 2 = 1)),
+            % foreach((R12,L,R) in Wr, R1 < R12, R12 < R2) (R < C1; C2 < L) end, % keine - im Rechteck              
+            % foreach((C12,O,U) in Sr, C1 < C12, C12 < C2) (U < R1; R2 < O) end, % keine | im Rechteck
+            % All Tiles in the rectangle lie within the area:
+            % Betrachte die Linien des Gitternetzes zwischen den Tiles!
+            foreach(Ci in C1..C2-1, Ri in R1..R2-1)
+                cntWr(Wr,Ri,Ci,-1) mod 2 = 1, cntWr(Wr,Ri,Ci,1) mod 2 = 1,
+                cntSr(Sr,Ri,Ci,-1) mod 2 = 1, cntSr(Sr,Ri,Ci,1) mod 2 = 1
+            end
+        then
+            printf("%w = (%d - %d + 1) * abs(%d - %d + 1)", A, Coord[I,1],Coord[J,1], Coord[I,2],Coord[J,2] ),
+            Good := true
+        end,
+        K := K + 1
+    while(Good == false, K =< len(As)). /*
+time(main(2,"short")): 9 = (9 - 7 + 1) * abs(5 - 3 + 1)  too low!
+time(main(2,"")):      4629351648 = (14598 - 84971 + 1) * abs(83092 - 17309 + 1) too high */

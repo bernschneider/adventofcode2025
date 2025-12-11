@@ -1,0 +1,27 @@
+% Advent of Code 07.12.2025 https://adventofcode.com/2025/day/7
+import util.
+
+main(Version) =>  % main("short") or main("") 
+    Line = read_file_lines("202507"++Version++".txt"), 
+    NR = len(Line), NC = len(Line[1]), 
+    IS = find_first_of(Line[1], 'S'), Line[1,IS] := '|', NoOfSplits = 0, 
+    foreach(R in 1..NR-1, C in 1..NC, Line[R,C] = '|')
+        if Line[R+1,C] = '^' 
+            then Line[R+1,C-1] :=  '|', Line[R+1,C+1] :=  '|', NoOfSplits := NoOfSplits + 1
+            else Line[R+1,C] := '|'
+        end
+    end,
+    timelines(Line,1,IS, Cnt),
+    printf("Part1: %d, Part2: %w", NoOfSplits, Cnt). /*
+main("short"): Part1: 21,   Part2: 40
+main(""):      Part1: 1609, Part2: 12472142047197             CPU time 0.023 seconds, correct */
+
+table(    +,   +,+, -)
+timelines(Line,R,C, Cnt), R = len(Line), Line[R,C] = '|' =>
+    Cnt = 1.
+timelines(Line,R,C, Cnt), Line[R,C] = '|' =>
+    timelines(Line,R+1,C, Cnt).
+timelines(Line,R,C,Cnt), Line[R,C] = '^' =>
+    timelines(Line,R+1,C-1, CntL),
+    timelines(Line,R+1,C+1, CntR),
+    Cnt = CntL + CntR.

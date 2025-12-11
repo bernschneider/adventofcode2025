@@ -1,0 +1,36 @@
+/* Advent of Code 10.12.2025 Part1
+https://adventofcode.com/2025/day/10 */
+import util, planner.
+
+main(Version) =>  % main("short") or main("") 
+    nolog,
+    Lines = read_file_lines("202510"++Version++".txt"), 
+    Total = 0,
+    foreach(Line in Lines)
+        L = Line.split(),
+        Light = L[1], Light := [cond(Chr='#', 1, 0) : Chr in Light[2..len(Light)-1]], 
+        Buts = L[2..len(L)-1], 
+        Buts := [map(to_int,Bs) : But in Buts, Bs = But[2..len(But)-1].split(",")],
+        % printf("Light=%w  \tButs=%w%n", Light, Buts),
+        search(Light, Buts, Cnt),
+        Total := Total + Cnt
+    end,
+    printf("You must press %d buttons.%n", Total).
+ /*
+time(main("short")): You must press 7 buttons, correct
+time(main("")):      You must press 396 buttons, correct */
+
+search(Final, Buts, Cnt) =>
+    Len = len(Final),
+    best_plan((Buts, Final, [0 : _ in 1..Len]), Plan),
+    Cnt = len(Plan).
+
+final((_, Final, Light)) => Light = Final.
+
+action((Buts, Final, Light), S1, Action, Cost) =>
+    member(But, Buts),
+    Light1 = copy_term(Light),
+    foreach(I in But) Light1[1+I] := 1 - Light1[1+I] end,
+    S1 = (Buts, Final, Light1),
+    Action = But,
+    Cost = 1.

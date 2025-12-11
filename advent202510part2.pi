@@ -1,0 +1,30 @@
+/* Advent of Code 10.12.2025 Part2
+https://adventofcode.com/2025/day/10 */
+import util, sat.
+
+main(Version) =>  % main("short") or main("") 
+    nolog,
+    Lines = read_file_lines("202510"++Version++".txt"), 
+    Total = 0, 
+    foreach(Line in Lines)
+        % Convert Line string into lists of integers:
+        L = Line.split(), Len = len(L),
+        Final = L[Len], Final := map(to_int, Final[2..len(Final)-1].split(",")), NC = len(Final),
+        Buts = L[2..len(L)-1], NB = len(Buts),
+        Buts := [map(to_int,Bs) : But in Buts, Bs = But[2..len(But)-1].split(",")],
+        % Create affection matrix M from Buts:
+        M = {{0 : _ in 1..NB} : _ in 1..NC}, % buttons in columns, affected counters in rows
+        foreach(B in 1..NB, Counter in Buts[B]) M[1+Counter,B] := 1 end,
+        % Define the variables and constrains:     
+        Press = new_array(NB), Press :: 0..1000, 
+        foreach({Row, F} in zip(M.rows(), Final)) 
+            scalar_product(Row, Press, F) 
+        end,            
+        Cnt #= sum(Press),
+        solve([$min(Cnt)], Press),
+        printf("For %w press %d buttons.%n", Final, Cnt),
+        Total := Total + Cnt
+    end,
+    printf("You must press %d buttons in total.%n", Total). /*
+time(main("short")): You must press 33 buttons in total, correct
+time(main("")):      You must press 15688 buttons in total, CPU time 59.815 seconds, correct */

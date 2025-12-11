@@ -1,0 +1,69 @@
+% Advent of Code 08.12.2025 https://adventofcode.com/2025/day/
+import util.
+
+main(1,Version) =>  % main("short") or main("") 
+    Lines = read_file_lines("202508"++Version++".txt"), 
+    N = len(Lines), 
+    NC = cond(Version = "short", 10, 1000), 
+    JB = [map(to_int, Line.split(",")) : Line in Lines], 
+    Closest = [], % Dist, I, J of closest points
+    foreach(I in 1..N-1, J in I+1..N)
+        Dist = (JB[I,1] - JB[J,1])**2 + (JB[I,2] - JB[J,2])**2 + (JB[I,3] - JB[J,3])**2,
+        Closest := [ [Dist, I, J] | Closest ]
+    end,
+    Closest := sort(Closest),
+    % foreach(C in 1..NC) println(Closest[C]) end,
+    Circ = {I : I in 1..N}, % initially single point circuits
+    Cnt = 0,
+    foreach([_,I0,J0] in Closest, break(Cnt = NC))
+        Cnt := Cnt + 1,
+        I = find_first_of(Circ, Circ[I0]), % smallest I in same circuit as I0
+        J = find_first_of(Circ, Circ[J0]), % smallest J in same circuit as J0
+        I1 = min(I,J), J1 = max(I,J), 
+        if I1 < J1 then % include circuit J1 to circuit I1:
+            Ks = [K : K in 1..N, Circ[K] == Circ[J1]], % not working if combined with next line :-(
+            foreach(K in Ks) Circ[K] := I1 end, % foreach(K in 1..N, Circ[K] == Circ[J1]]) ..
+        end
+    end,
+    Largest = [0 : _ in 1..3], % Size
+    foreach(I in 1..N)
+        Size = 0,
+        foreach(J in 1..N, Circ[J] = I) Size := Size + 1 end,
+        if Size > Largest[3] then
+            Largest := insert_ordered_down(Largest[1..2], Size)
+        end
+    end,
+    printf("%d = prod(%w)", prod(Largest), Largest). /*
+time(main("short")): 40 = prod([5,4,2])                  CPU time 0.001 seconds, correct
+time(main("")):      47040 = prod([42,35,32])            CPU time 5.894 seconds, correct */
+
+main(2,Version) =>  % main("short") or main("") 
+    Lines = read_file_lines("202508"++Version++".txt"), 
+    N = len(Lines), 
+    JB = [map(to_int, Line.split(",")) : Line in Lines], 
+    Closest = [], % Dist, I, J of closest points
+    foreach(I in 1..N-1, J in I+1..N)
+        Dist = (JB[I,1] - JB[J,1])**2 + (JB[I,2] - JB[J,2])**2 + (JB[I,3] - JB[J,3])**2,
+        Closest := [ [Dist, I, J] | Closest ]
+    end,
+    Closest := sort(Closest),
+    % foreach(C in 1..NC) println(Closest[C]) end,
+    Circ = {I : I in 1..N}, % initially single point circuits
+    Size = {1 : _ in 1..N}, % size of circuits
+    foreach([_,I0,J0] in Closest, break(Size[1] = N))
+        I = find_first_of(Circ, Circ[I0]), % smallest I in same circuit as I0
+        J = find_first_of(Circ, Circ[J0]), % smallest J in same circuit as J0
+        I1 = min(I,J), J1 = max(I,J), 
+        if I1 < J1 then % include circuit J1 to circuit I1:
+            Ks = [K : K in 1..N, Circ[K] == Circ[J1]], % not working if combined with next line :-(
+            foreach(K in Ks) Circ[K] := I1 end, % foreach(K in 1..N, Circ[K] == Circ[J1]]) ..
+            Size[I1] := Size[I1] + Size[J1],
+            Size[J1] := 0, % delete circuit J
+            if Size[1] = N then 
+                printf("JB[I0]=%w, JB[J0]=%w, Res=%w", JB[I0], JB[J0], JB[I0,1] * JB[J0,1]) 
+            end
+        end
+    end. /*
+time(main("short")): JB[I0]=[216,146,977], JB[J0]=[117,168,530], Res=25272, correct
+time(main("")):      JB[I0]=[68306,16270,43777], JB[J0]=[71516,2598,44649], Res=4884971896
+CPU time 6.228 seconds, correct */

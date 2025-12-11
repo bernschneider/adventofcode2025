@@ -1,0 +1,26 @@
+/* Advent of Code 11.12.2025 Part1
+https://adventofcode.com/2025/day/11 */
+import util.
+
+table(+, +,   +, -) 
+paths(G, Tbv, V, Cnt), V = "out", Tbv = []  => Cnt = 1. % all Tbv vertices were visited
+paths(G, Tbv, V, Cnt), V = "out"            => Cnt = 0. % otherwise
+paths(G, Tbv, V, Cnt) =>                    %  v- remove V1 from Tbv and count paths of V1:
+    Cnt = sum([Cnt1 : V1 in G.get(V), paths(G, delete(Tbv,V1), V1, Cnt1)]).
+
+main(Part, Version) =>  % Version = "short" or "part2" (examples) or "" (problem) 
+    Lines = read_file_lines("202511"++Version++".txt"), 
+    G = new_map(), % Key = first vertex name without ':', Value = list of remaining vertex names
+    foreach(Line in Lines)
+        L = Line.split(), 
+        G.put(rstrip(L[1],":"), L[2..len(L)]) 
+    end,
+    if Part = 1 
+        then paths(G, [],             "you", Total) % starting at "you"
+        else paths(G, ["dac", "fft"], "svr", Total) % starting at "svr"; "dac" and "fft" must be visited!
+    end,
+    printf("There are %w paths.%n", Total). /*
+time(main(1,"short")): There are 5 paths,                  correct
+time(main(1,"")):      There are 708 paths,                CPU time 0.004 seconds, correct
+time(main(2,"part2")): There are 2 paths                   correct
+time(main(2,"")):      There are 545394698933400 paths     CPU time 1.704 seconds, correct */
